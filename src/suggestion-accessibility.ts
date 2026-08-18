@@ -43,6 +43,7 @@ export class SuggestionAccessibility {
 	private liveRegion: HTMLElement;
 	private activeHost: HTMLElement | null = null;
 	private activePopup: HTMLElement | null = null;
+	private lastAnnouncedCount = -1;
 
 	constructor() {
 		this.liveRegion = document.createElement("div");
@@ -105,28 +106,51 @@ export class SuggestionAccessibility {
 		host.setAttribute("aria-controls", listEl.id);
 		host.setAttribute("aria-autocomplete", "list");
 
-		this.syncItems(popup, /* announceCount */ true);
+		this.lastAnnouncedCount = -1;
+		this.syncItems(popup);
 
 		this.itemObserver?.disconnect();
-		this.itemObserver = new MutationObserver((mutations) => {
-			const itemsChanged = mutations.some((m) => m.type === "childList");
-			this.syncItems(popup, itemsChanged);
-		});
+		this.itemObserver = new MutationObserver(() => this.syncItems(popup));
 		this.itemObserver.observe(popup, {
 			attributes: true,
-			attributeFilter: ["class"],
+			attributeFilter: ["class", "style", "hidden"],
 			subtree: true,
 			childList: true,
 		});
 	}
 
-	private syncItems(popup: HTMLElement, announceCount: boolean): void {
-		const items = popup.querySelectorAll<HTMLElement>(".suggestion-item");
-		let selected: HTMLElement | null = null;
+	// Obsidian appears to cap the popup at a fixed pool of rendered items
+	// (observed: exactly 100) and hide non-matching ones via CSS as you
+	// narrow the query, rather than adding/removing DOM nodes. So "how many
+	// suggestions are available" has to mean "how many are actually
+	// rendered visible," not "how many .suggestion-item elements exist" —
+	// and since visibility changes via class/style attribute mutations
+	// rather than childList mutations, re-announcing has to be driven by
+	// whether the visible count changed, not by which mutation type fired.
+	private isVisible(el: HTMLElement): boolean {
+		if (el.hidden) return false;
+		if (getComputedStyle(el).display === "none") return false;
+		return el.getClientRects().length > 0;
+	}
 
-		for (const item of Array.from(items)) {
+	private syncItems(popup: HTMLElement): void {
+		const allItems = Array.from(popup.querySelectorAll<HTMLElement>(".suggestion-item"));
+		let selected: HTMLElement | null = null;
+		let visibleCount = 0;
+
+		for (const item of allItems) {
 			if (!item.id) item.id = nextId("ariadne-option");
+
+			if (!this.isVisible(item)) {
+				item.setAttribute("aria-hidden", "true");
+				item.removeAttribute("role");
+				item.removeAttribute("aria-selected");
+				continue;
+			}
+
+			item.removeAttribute("aria-hidden");
 			item.setAttribute("role", "option");
+			visibleCount += 1;
 			const isSelected = item.classList.contains("is-selected");
 			item.setAttribute("aria-selected", isSelected ? "true" : "false");
 			if (isSelected) selected = item;
@@ -140,10 +164,10 @@ export class SuggestionAccessibility {
 			}
 		}
 
-		if (announceCount) {
-			const count = items.length;
-			log(`tagged ${count} suggestion item${count === 1 ? "" : "s"}, selected: ${selected ? selected.id : "none"}`);
-			this.announce(`${count} suggestion${count === 1 ? "" : "s"} available`);
+		if (visibleCount !== this.lastAnnouncedCount) {
+			this.lastAnnouncedCount = visibleCount;
+			log(`visible suggestion count changed to ${visibleCount} (of ${allItems.length} rendered), selected: ${selected ? selected.id : "none"}`);
+			this.announce(`${visibleCount} suggestion${visibleCount === 1 ? "" : "s"} available`);
 		}
 	}
 
