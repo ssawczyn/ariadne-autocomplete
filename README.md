@@ -21,7 +21,7 @@ Obsidian's suggestion popups all appear to share one internal DOM pattern: a `.s
 
 Because it's generic to the popup pattern rather than wikilink-specific, it should also apply to any other Obsidian UI built on the same suggestion component (see [catalog issue #6](https://github.com/ssawczyn/Ariadne/blob/main/docs/CATALOG.md) re: the command palette) — that's untested, not a design goal we're claiming credit for yet.
 
-**Important caveat:** the class names above (`.suggestion-container`, `.suggestion-item`, `.is-selected`) are Obsidian's internal, undocumented markup, inferred from known/observed behavior rather than verified against a running instance while writing this. This has not yet been tested in a real vault with a real screen reader. If the selectors don't match your installed Obsidian version, the retrofit will silently do nothing rather than error — check with dev tools if suggestions don't seem to be getting tagged.
+**Important caveat:** the class names above (`.suggestion-container`, `.suggestion-item`, `.is-selected`) are Obsidian's internal, undocumented markup, inferred from known/observed behavior rather than verified against a running instance while writing this. This has not yet been tested in a real vault with a real screen reader. If the selectors don't match your installed Obsidian version, the retrofit will silently do nothing rather than error.
 
 ## Status
 
@@ -35,6 +35,17 @@ npm run dev
 ```
 
 This builds `main.js` in watch mode. Symlink or copy this directory into a test vault's `.obsidian/plugins/ariadne-autocomplete/` folder to load it.
+
+## Testing
+
+The plugin logs plain-text status lines to the console (`[Ariadne] ...`) at each step — popup detected, items tagged, popup closed — as a debugging aid that doesn't require navigating DevTools' Elements accessibility tree, which is a poor experience for screen reader users in its own right. Reading the console log is optional, though; the actual test is simpler:
+
+1. With the plugin enabled, open a note and type `[[`.
+2. Listen for an announcement that suggestions are available.
+3. Press the down arrow and listen for whether the highlighted suggestion changes what's announced.
+4. Press Escape and confirm things go quiet.
+
+What you hear (or don't) at each step is itself the diagnostic — it doesn't need to be paired with a DevTools inspection to be useful for narrowing down what's broken.
 
 ## License
 
