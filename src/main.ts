@@ -1,14 +1,15 @@
 import { Plugin } from "obsidian";
+import { SuggestionAccessibility } from "./suggestion-accessibility";
 
 export default class AriadneAutocompletePlugin extends Plugin {
+	private suggestionA11y: SuggestionAccessibility | null = null;
+
 	async onload() {
-		// TODO: retrofit Obsidian's EditorSuggest-based popups (starting with
-		// the wikilink `[[` suggester) with proper ARIA combobox semantics:
-		// role="listbox"/"option" on the popup, aria-activedescendant tracking
-		// the highlighted suggestion, aria-expanded on the editor, and a
-		// live-region announcement when suggestions appear. See
-		// https://github.com/ssawczyn/Ariadne/blob/main/docs/CATALOG.md#1
+		this.suggestionA11y = new SuggestionAccessibility();
 	}
 
-	onunload() {}
+	onunload() {
+		this.suggestionA11y?.destroy();
+		this.suggestionA11y = null;
+	}
 }
