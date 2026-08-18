@@ -16,14 +16,6 @@ function nextId(prefix: string): string {
 	return `${prefix}-${idCounter}`;
 }
 
-// Plain-text status log, not a UI element — meant to be readable in the
-// DevTools Console panel (a flat text stream) without needing to navigate
-// the Elements accessibility tree, which is its own accessibility problem
-// for a screen reader user trying to debug this plugin.
-function log(message: string): void {
-	console.log(`[Ariadne] ${message}`);
-}
-
 /**
  * Retrofits Obsidian's suggestion popups (the `[[` wikilink autocomplete,
  * and anything else built on the same popup pattern — e.g. tag suggest)
@@ -44,8 +36,11 @@ export class SuggestionAccessibility {
 	private activeHost: HTMLElement | null = null;
 	private activePopup: HTMLElement | null = null;
 	private lastAnnouncedCount = -1;
+	private isDebugEnabled: () => boolean;
 
-	constructor() {
+	constructor(isDebugEnabled: () => boolean = () => false) {
+		this.isDebugEnabled = isDebugEnabled;
+
 		this.liveRegion = document.createElement("div");
 		this.liveRegion.setAttribute("aria-live", "polite");
 		this.liveRegion.setAttribute("role", "status");
@@ -55,7 +50,18 @@ export class SuggestionAccessibility {
 		this.bodyObserver = new MutationObserver((mutations) => this.onBodyMutation(mutations));
 		this.bodyObserver.observe(document.body, { childList: true });
 
-		log("watching for suggestion popups");
+		this.log("watching for suggestion popups");
+	}
+
+	// Plain-text status log, not a UI element — meant to be readable in the
+	// DevTools Console panel (a flat text stream) without needing to
+	// navigate the Elements accessibility tree, which is its own
+	// accessibility problem for a screen reader user trying to debug this
+	// plugin. Off by default so real users don't get a console full of
+	// noise; flip via settings.debugLogging (no UI for that yet).
+	private log(message: string): void {
+		if (!this.isDebugEnabled()) return;
+		console.log(`[Ariadne] ${message}`);
 	}
 
 	destroy(): void {
@@ -89,11 +95,11 @@ export class SuggestionAccessibility {
 	private onPopupOpened(popup: HTMLElement): void {
 		const host = document.activeElement;
 		if (!(host instanceof HTMLElement)) {
-			log("popup detected, but document.activeElement was not an element — skipping");
+			this.log("popup detected, but document.activeElement was not an element — skipping");
 			return;
 		}
 
-		log(`popup detected, host is <${host.tagName.toLowerCase()}${host.id ? "#" + host.id : ""}${host.className ? "." + String(host.className).replace(/\s+/g, ".") : ""}>`);
+		this.log(`popup detected, host is <${host.tagName.toLowerCase()}${host.id ? "#" + host.id : ""}${host.className ? "." + String(host.className).replace(/\s+/g, ".") : ""}>`);
 
 		this.activePopup = popup;
 		this.activeHost = host;
@@ -166,13 +172,13 @@ export class SuggestionAccessibility {
 
 		if (visibleCount !== this.lastAnnouncedCount) {
 			this.lastAnnouncedCount = visibleCount;
-			log(`visible suggestion count changed to ${visibleCount} (of ${allItems.length} rendered), selected: ${selected ? selected.id : "none"}`);
+			this.log(`visible suggestion count changed to ${visibleCount} (of ${allItems.length} rendered), selected: ${selected ? selected.id : "none"}`);
 			this.announce(`${visibleCount} suggestion${visibleCount === 1 ? "" : "s"} available`);
 		}
 	}
 
 	private onPopupClosed(): void {
-		log("popup closed");
+		this.log("popup closed");
 		this.teardownHost();
 		this.itemObserver?.disconnect();
 		this.itemObserver = null;

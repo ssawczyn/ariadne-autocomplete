@@ -45,7 +45,13 @@ This builds `main.js` in watch mode. Symlink or copy this directory into a test 
 
 ## Testing
 
-The plugin logs plain-text status lines to the console (`[Ariadne] ...`) at each step — popup detected, items tagged, popup closed — as a debugging aid that doesn't require navigating DevTools' Elements accessibility tree, which is a poor experience for screen reader users in its own right. Reading the console log is optional, though; the actual test is simpler:
+The plugin can log plain-text status lines to the console (`[Ariadne] ...`) at each step — popup detected, items tagged, popup closed — as a debugging aid that doesn't require navigating DevTools' Elements accessibility tree, which is a poor experience for screen reader users in its own right. **This is off by default** so real users don't get a console full of noise; there's no settings UI for it yet, but it can be flipped on in the DevTools console with:
+
+```js
+app.plugins.plugins["ariadne-autocomplete"].settings.debugLogging = true
+```
+
+(A proper settings toggle is planned — this is a stopgap so testers can opt in without needing a rebuild.) Reading the console log is optional either way; the actual test is simpler:
 
 1. With the plugin enabled, open a note and type `[[`.
 2. Listen for an announcement that suggestions are available.
