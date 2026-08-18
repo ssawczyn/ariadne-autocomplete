@@ -25,14 +25,14 @@ Because it's generic to the popup pattern rather than wikilink-specific, it shou
 
 ## Status
 
-**Confirmed working for the `[[` wikilink autocomplete**, tested live on macOS with VoiceOver:
+**Confirmed working for both `[[` wikilink and `#` tag autocomplete**, tested live on macOS with VoiceOver, with zero code changes needed between the two — confirms the fix is genuinely generic to Obsidian's shared suggestion-popup component, not wikilink-specific:
 
 - ✅ Announces suggestion availability when the popup opens
 - ✅ Arrow-key navigation reads the correct highlighted suggestion
 - ✅ Suggestion count stays accurate as the query narrows (fixed in [ede864e](https://github.com/ssawczyn/ariadne-autocomplete/commit/ede864e) — Obsidian renders a fixed pool of items and hides non-matches via CSS rather than removing them, so the count has to track visible items, not DOM node count)
 - ✅ Escape cleanly dismisses and returns focus state to normal
 
-Not yet tested: other suggestion contexts (tag autocomplete, etc. — the fix is generic to the popup pattern, so it may already cover these, but that's unconfirmed), Windows/NVDA and other screen reader + OS combinations.
+Not yet tested: other suggestion contexts (embeds, frontmatter property values, the command palette — plausible given two-for-two so far, but unconfirmed), Windows/NVDA and other screen reader + OS combinations.
 
 ## Development
 
