@@ -21,11 +21,18 @@ Obsidian's suggestion popups all appear to share one internal DOM pattern: a `.s
 
 Because it's generic to the popup pattern rather than wikilink-specific, it should also apply to any other Obsidian UI built on the same suggestion component (see [catalog issue #6](https://github.com/ssawczyn/Ariadne/blob/main/docs/CATALOG.md) re: the command palette) — that's untested, not a design goal we're claiming credit for yet.
 
-**Important caveat:** the class names above (`.suggestion-container`, `.suggestion-item`, `.is-selected`) are Obsidian's internal, undocumented markup, inferred from known/observed behavior rather than verified against a running instance while writing this. This has not yet been tested in a real vault with a real screen reader. If the selectors don't match your installed Obsidian version, the retrofit will silently do nothing rather than error.
+**Important caveat:** the class names above (`.suggestion-container`, `.suggestion-item`, `.is-selected`) are Obsidian's internal, undocumented markup, inferred from known/observed behavior, not a published API. They may shift in future Obsidian versions. If they do, the retrofit will silently do nothing rather than error.
 
 ## Status
 
-Initial ARIA retrofit implemented and builds cleanly. **Not yet verified against a live Obsidian vault or a real screen reader** — that's the next step.
+**Confirmed working for the `[[` wikilink autocomplete**, tested live on macOS with VoiceOver:
+
+- ✅ Announces suggestion availability when the popup opens
+- ✅ Arrow-key navigation reads the correct highlighted suggestion
+- ✅ Suggestion count stays accurate as the query narrows (fixed in [ede864e](https://github.com/ssawczyn/ariadne-autocomplete/commit/ede864e) — Obsidian renders a fixed pool of items and hides non-matches via CSS rather than removing them, so the count has to track visible items, not DOM node count)
+- ✅ Escape cleanly dismisses and returns focus state to normal
+
+Not yet tested: other suggestion contexts (tag autocomplete, etc. — the fix is generic to the popup pattern, so it may already cover these, but that's unconfirmed), Windows/NVDA and other screen reader + OS combinations.
 
 ## Development
 
