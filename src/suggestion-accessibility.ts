@@ -87,9 +87,19 @@ export class SuggestionAccessibility {
 		}
 	}
 
+	// `.suggestion-container` is the inline popup used by EditorSuggest
+	// (wikilink/tag autocomplete). `.prompt-results` is the results list
+	// used by the modal-based Prompt component shared by the command
+	// palette and Quick Switcher — confirmed by reading Obsidian's own
+	// installed app bundle: both wire up the exact same `.suggestion-item`
+	// / `.is-selected` mechanics underneath, just inside a different
+	// container element. Only the container selector differs; everything
+	// downstream (tagging items, tracking selection) is unchanged.
+	private static readonly POPUP_SELECTOR = ".suggestion-container, .prompt-results";
+
 	private findSuggestionPopup(node: HTMLElement): HTMLElement | null {
-		if (node.matches(".suggestion-container")) return node;
-		return node.querySelector<HTMLElement>(".suggestion-container");
+		if (node.matches(SuggestionAccessibility.POPUP_SELECTOR)) return node;
+		return node.querySelector<HTMLElement>(SuggestionAccessibility.POPUP_SELECTOR);
 	}
 
 	private onPopupOpened(popup: HTMLElement): void {
