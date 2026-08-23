@@ -6,11 +6,12 @@ Part of the [Ariadne](https://github.com/ssawczyn/Ariadne) project. See [issue #
 
 ## The problem
 
-Obsidian's `[[` wikilink suggestion popup doesn't announce itself to screen readers, and doesn't expose keyboard navigation state to assistive tech — even though you can visually see a highlighted suggestion move as you press arrow keys, nothing tells a screen reader which option is selected or that a list of suggestions exists at all.
+I am a blind screen reader user who has been trying, unsuccessfully, to use Obsidian in an efficient way.  While much work has been put into adding keyboard navigation, there exist many situations where dynamically changing content is not picked up by screen readers and other assistive technologies.  For example:
+Obsidian's `[[` wikilink suggestion popup doesn't announce itself to screen readers, and doesn't expose keyboard navigation state to assistive tech — even though a sighted user can visually see a highlighted suggestion move as arrow keys are pressed, nothing tells a screen reader which option is selected or that a list of suggestions exists at all.
 
 This appears to be because the popup is Obsidian's own bespoke `EditorSuggest`-based UI, not built on CodeMirror 6's `@codemirror/autocomplete` package (which already implements the accessible ARIA combobox pattern). See the catalog entry for more detail.
 
-## How it works
+## How it works, the technical stuff
 
 Obsidian's suggestion popups all appear to share one internal DOM pattern: a `.suggestion-container` holding a list of `.suggestion-item` elements, with `.is-selected` toggled on whichever one is currently highlighted. This plugin watches for that pattern with a `MutationObserver` and layers standard ARIA combobox/listbox semantics on top of it, without touching Obsidian's own rendering or keyboard handling:
 
@@ -19,13 +20,13 @@ Obsidian's suggestion popups all appear to share one internal DOM pattern: a `.s
 - `aria-activedescendant` kept in sync with the `.is-selected` item as you arrow through
 - A polite live-region announcement of how many suggestions are available, so screen readers know a popup opened at all
 
-Because it's generic to the popup pattern rather than wikilink-specific, it should also apply to any other Obsidian UI built on the same suggestion component (see [catalog issue #6](https://github.com/ssawczyn/Ariadne/blob/main/docs/CATALOG.md) re: the command palette) — that's untested, not a design goal we're claiming credit for yet.
+Because it's generic to the popup pattern rather than wikilink-specific, it should also apply to any other Obsidian UI built on the same suggestion component (see [catalog issue #6](https://github.com/ssawczyn/Ariadne/blob/main/docs/CATALOG.md) re: the command palette).
 
-**Important caveat:** the class names above (`.suggestion-container`, `.suggestion-item`, `.is-selected`) are Obsidian's internal, undocumented markup, inferred from known/observed behavior, not a published API. They may shift in future Obsidian versions. If they do, the retrofit will silently do nothing rather than error.
+**Important caveat:** the class names above (`.suggestion-container`, `.suggestion-item`, `.is-selected`) are Obsidian's internal, undocumented markup, inferred from known/observed behavior, not a published API. They may shift in future Obsidian versions. If they do, the retrofit will silently do nothing rather than error and I'll get the joy of reengineering a solution.
 
 ## Status
 
-**Confirmed working across two different Obsidian UI patterns**, tested live on macOS with VoiceOver:
+**Confirmed working across multiple Obsidian UI patterns**, tested live on macOS with VoiceOver:
 
 - The inline `EditorSuggest` popup (`.suggestion-container`) — `[[` wikilink autocomplete and `#` tag autocomplete, with zero code changes needed between the two.
 - The modal-based Prompt component (`.prompt-results`) — the command palette and Quick Switcher, added in [47e381a](https://github.com/ssawczyn/ariadne-autocomplete/commit/47e381a) after root-causing the difference by reading Obsidian's own installed app bundle.
@@ -67,3 +68,8 @@ What you hear (or don't) at each step is itself the diagnostic — it doesn't ne
 ## License
 
 [MIT](LICENSE)
+
+## Final thoughts
+While I wish accessibility were prioritized more highly in Obsidian directly, I'm really glad that it's possible to create work-arounds via plugins like this.  While I fully intend to continue maintaining this plugin, I live in hope that there will come a day when this plugin is no longer needed.  In the meantime, please contact me or file an issue for any enhancement requests or other suggestions.  My goal is to release additional plugins to target additional areas where accessibility is problematic in Obsidian.
+
+Thank you for using this plugin, I hope it enhances your productivity as it has enhanced mine.
