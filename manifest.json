@@ -1,9 +1,9 @@
 {
 	"id": "ariadne-autocomplete",
 	"name": "Ariadne Autocomplete Accessibility",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"minAppVersion": "1.4.0",
-	"description": "Adds screen reader and keyboard accessibility to Obsidian's wikilink and other suggestion popups.",
+	"description": "Adds screen reader and keyboard accessibility to wikilink and other suggestion popups.",
 	"author": "Steve Sawczyn",
 	"authorUrl": "https://github.com/ssawczyn",
 	"isDesktopOnly": false
