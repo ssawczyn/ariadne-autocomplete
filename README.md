@@ -25,14 +25,18 @@ Because it's generic to the popup pattern rather than wikilink-specific, it shou
 
 ## Status
 
-**Confirmed working for both `[[` wikilink and `#` tag autocomplete**, tested live on macOS with VoiceOver, with zero code changes needed between the two — confirms the fix is genuinely generic to Obsidian's shared suggestion-popup component, not wikilink-specific:
+**Confirmed working across two different Obsidian UI patterns**, tested live on macOS with VoiceOver:
 
-- ✅ Announces suggestion availability when the popup opens
-- ✅ Arrow-key navigation reads the correct highlighted suggestion
-- ✅ Suggestion count stays accurate as the query narrows (fixed in [ede864e](https://github.com/ssawczyn/ariadne-autocomplete/commit/ede864e) — Obsidian renders a fixed pool of items and hides non-matches via CSS rather than removing them, so the count has to track visible items, not DOM node count)
-- ✅ Escape cleanly dismisses and returns focus state to normal
+- The inline `EditorSuggest` popup (`.suggestion-container`) — `[[` wikilink autocomplete and `#` tag autocomplete, with zero code changes needed between the two.
+- The modal-based Prompt component (`.prompt-results`) — the command palette and Quick Switcher, added in [47e381a](https://github.com/ssawczyn/ariadne-autocomplete/commit/47e381a) after root-causing the difference by reading Obsidian's own installed app bundle.
 
-Not yet tested: other suggestion contexts (embeds, frontmatter property values, the command palette — plausible given two-for-two so far, but unconfirmed), Windows/NVDA and other screen reader + OS combinations.
+All confirmed to:
+- ✅ Announce suggestion availability when the popup opens
+- ✅ Read the correct highlighted suggestion via arrow-key navigation
+- ✅ Keep the suggestion count accurate as the query narrows (fixed in [ede864e](https://github.com/ssawczyn/ariadne-autocomplete/commit/ede864e) — Obsidian renders a fixed pool of items and hides non-matches via CSS rather than removing them, so the count has to track visible items, not DOM node count)
+- ✅ Dismiss cleanly on Escape
+
+Not yet tested: other suggestion contexts (embeds, frontmatter property values), Windows/NVDA and other screen reader + OS combinations.
 
 ## Development
 
