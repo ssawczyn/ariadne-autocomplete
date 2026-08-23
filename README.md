@@ -56,7 +56,7 @@ The plugin can log plain-text status lines to the console (`[Ariadne] ...`) at e
 app.plugins.plugins["ariadne-autocomplete"].settings.debugLogging = true
 ```
 
-(A proper settings toggle is planned — this is a stopgap so testers can opt in without needing a rebuild.) Reading the console log is optional either way; the actual test is simpler:
+(A proper settings toggle is planned — this is a stopgap so testers can opt in without needing a rebuild.) It logs via `console.debug`, which Chromium DevTools hides by default under its "Verbose" filter level — if you enable `debugLogging` and see nothing, check the console's log-level filter before assuming it's broken. Reading the console log is optional either way; the actual test is simpler:
 
 1. With the plugin enabled, open a note and type `[[`.
 2. Listen for an announcement that suggestions are available.

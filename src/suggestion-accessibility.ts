@@ -41,11 +41,11 @@ export class SuggestionAccessibility {
 	constructor(isDebugEnabled: () => boolean = () => false) {
 		this.isDebugEnabled = isDebugEnabled;
 
-		this.liveRegion = document.createElement("div");
-		this.liveRegion.setAttribute("aria-live", "polite");
-		this.liveRegion.setAttribute("role", "status");
+		this.liveRegion = createDiv({
+			attr: { "aria-live": "polite", role: "status" },
+			parent: document.body,
+		});
 		Object.assign(this.liveRegion.style, SR_ONLY_STYLE);
-		document.body.appendChild(this.liveRegion);
 
 		this.bodyObserver = new MutationObserver((mutations) => this.onBodyMutation(mutations));
 		this.bodyObserver.observe(document.body, { childList: true });
@@ -61,7 +61,7 @@ export class SuggestionAccessibility {
 	// noise; flip via settings.debugLogging (no UI for that yet).
 	private log(message: string): void {
 		if (!this.isDebugEnabled()) return;
-		console.log(`[Ariadne] ${message}`);
+		console.debug(`[Ariadne] ${message}`);
 	}
 
 	destroy(): void {
@@ -74,12 +74,12 @@ export class SuggestionAccessibility {
 	private onBodyMutation(mutations: MutationRecord[]): void {
 		for (const mutation of mutations) {
 			for (const node of Array.from(mutation.addedNodes)) {
-				if (!(node instanceof HTMLElement)) continue;
+				if (!node.instanceOf(HTMLElement)) continue;
 				const popup = this.findSuggestionPopup(node);
 				if (popup) this.onPopupOpened(popup);
 			}
 			for (const node of Array.from(mutation.removedNodes)) {
-				if (!(node instanceof HTMLElement)) continue;
+				if (!node.instanceOf(HTMLElement)) continue;
 				if (node === this.activePopup || node.contains(this.activePopup)) {
 					this.onPopupClosed();
 				}
@@ -104,7 +104,7 @@ export class SuggestionAccessibility {
 
 	private onPopupOpened(popup: HTMLElement): void {
 		const host = document.activeElement;
-		if (!(host instanceof HTMLElement)) {
+		if (!host || !host.instanceOf(HTMLElement)) {
 			this.log("popup detected, but document.activeElement was not an element — skipping");
 			return;
 		}

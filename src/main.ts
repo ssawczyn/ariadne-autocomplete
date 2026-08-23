@@ -14,7 +14,8 @@ export default class AriadneAutocompletePlugin extends Plugin {
 	private suggestionA11y: SuggestionAccessibility | null = null;
 
 	async onload() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const loadedData = (await this.loadData()) as Partial<AriadneAutocompleteSettings> | null;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 		// No settings UI yet — flip this in data.json (or via the console:
 		// `app.plugins.plugins["ariadne-autocomplete"].settings.debugLogging = true`)
 		// until there's a proper toggle. Passed as a callback so a future

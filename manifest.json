@@ -1,7 +1,7 @@
 {
 	"id": "ariadne-autocomplete",
 	"name": "Ariadne Autocomplete Accessibility",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"minAppVersion": "1.4.0",
 	"description": "Adds screen reader and keyboard accessibility to wikilink and other suggestion popups.",
 	"author": "Steve Sawczyn",
